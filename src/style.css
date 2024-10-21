@@ -1,0 +1,8 @@
+#canvas {
+	image-rendering: pixelated;
+}
+
+body {
+	display: flex;
+	gap: 10px;
+}
