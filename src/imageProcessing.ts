@@ -21,6 +21,82 @@ export const getOffset = (x: number, y: number, width: number) => {
 	return (y * width + x) * 4;
 };
 
+export const averageGrayscale = (
+	imageData: globalThis.ImageData,
+	offset: number,
+) => {
+	const r = imageData.data[offset];
+	const g = imageData.data[offset + 1];
+	const b = imageData.data[offset + 2];
+	const grayscale = (r + g + b) / 3;
+
+	return grayscale;
+};
+
+export const luminanceGrayscale = (
+	imageData: globalThis.ImageData,
+	offset: number,
+) => {
+	const r = imageData.data[offset];
+	const g = imageData.data[offset + 1];
+	const b = imageData.data[offset + 2];
+
+	return 0.3 * r + 0.587 * g + 0.114 * b;
+};
+
+export const brightness = (
+	imageData: globalThis.ImageData,
+	offset: number,
+	amount: number = 1,
+) => {
+	const r = imageData.data[offset] * amount;
+	const g = imageData.data[offset + 1] * amount;
+	const b = imageData.data[offset + 2] * amount;
+
+	return [r, g, b];
+};
+
+export const bright = (
+	imageData: globalThis.ImageData,
+	offset: number,
+	amount: number = 1,
+) => {
+	const r = 255 * Math.pow(imageData.data[offset] / 255, amount);
+	const g = 255 * Math.pow(imageData.data[offset + 1] / 255, amount);
+	const b = 255 * Math.pow(imageData.data[offset + 2] / 255, amount);
+
+	return [r, g, b];
+};
+
+export const contrast = (
+	imageData: globalThis.ImageData,
+	offset: number,
+	amount: number = 1,
+) => {
+	const r = 255 * ((imageData.data[offset] / 255 - 0.5) * amount + 0.5);
+	const g = 255 * ((imageData.data[offset + 1] / 255 - 0.5) * amount + 0.5);
+	const b = 255 * ((imageData.data[offset + 2] / 255 - 0.5) * amount + 0.5);
+
+	return [r, g, b];
+};
+
+export const saturation = (
+	imageData: globalThis.ImageData,
+	offset: number,
+	amount: number = 1,
+) => {
+	const gray =
+		(imageData.data[offset] +
+			imageData.data[offset + 1] +
+			imageData.data[offset + 2]) /
+		3;
+	const r = imageData.data[offset] * amount + gray * (1 - amount);
+	const g = imageData.data[offset + 1] * amount + gray * (1 - amount);
+	const b = imageData.data[offset + 2] * amount + gray * (1 - amount);
+
+	return [r, g, b];
+};
+
 export const cloneCanvas = (oldCanvas: HTMLCanvasElement) => {
 	const destCanvas = document.createElement('canvas');
 	destCanvas.width = oldCanvas.width;
@@ -45,9 +121,12 @@ export const cloneCanvas = (oldCanvas: HTMLCanvasElement) => {
 	for (let y = 0; y < oldCanvas.height; y++) {
 		for (let x = 0; x < oldCanvas.width; x++) {
 			const offset = getOffset(x, y, oldCanvas.width);
-			for (let i = 0; i < 4; i++) {
-				destImageData.data[offset + i] = oldImageData.data[offset + i];
-			}
+			// const grayscaleValue = luminanceGrayscale(oldImageData, offset);
+			const [r, g, b] = saturation(oldImageData, offset, 4);
+			destImageData.data[offset] = r;
+			destImageData.data[offset + 1] = g;
+			destImageData.data[offset + 2] = b;
+			destImageData.data[offset + 3] = oldImageData.data[offset + 3];
 		}
 	}
 
